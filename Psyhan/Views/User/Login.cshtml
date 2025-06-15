@@ -1,0 +1,22 @@
+﻿@model Dataaccess.Entities.User
+
+@{
+    ViewBag.Title = "Giriş Yap";
+}
+
+<h2>Giriş Yap</h2>
+
+@using (Html.BeginForm("Login", "User", FormMethod.Post))
+{
+    <div class="form-group">
+        @Html.LabelFor(m => m.UserName, "Kullanıcı Adı")
+        @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", placeholder = "Kullanıcı Adınızı girin" })
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(m => m.Password, "Şifre")
+        @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Şifrenizi girin" })
+    </div>
+
+    <button type="submit" class="btn btn-success">Giriş Yap</button>
+}

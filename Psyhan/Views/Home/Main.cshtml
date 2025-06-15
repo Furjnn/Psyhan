@@ -1,0 +1,364 @@
+﻿
+@{
+    ViewBag.Title = "Main";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>EMDR Simülatörü</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f4;
+            font-family: Arial, sans-serif;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #tracker {
+            width: 60px;
+            height: 60px;
+            background-color: #2c3e90;
+            border-radius: 50%;
+            position: absolute;
+            transition: all 1s ease-in-out;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            opacity: 0;
+        }
+
+        .control-section {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+            button:hover {
+                background-color: #2980b9;
+            }
+
+        .settings {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            background-color: rgba(255,255,255,0.9);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+            .settings > div {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+        label {
+            font-weight: 500;
+            color: #333;
+        }
+
+        select {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        #startInstruction {
+            text-align: center;
+            color: #666;
+            margin-top: 50px;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        #stopBtn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: #e74c3c;
+        }
+
+            #stopBtn:hover {
+                background-color: #c0392b;
+            }
+
+        #personalizeBtn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #9b59b6;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+            #personalizeBtn:hover {
+                background-color: #8e44ad;
+            }
+
+        #personalizationStatus {
+            position: absolute;
+            top: 70px;
+            right: 20px;
+            background-color: rgba(46, 204, 113, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="settings">
+        <div>
+            <label>Top Rengi:</label>
+            <select id="colorSelector" onchange="updateSettings()">
+                <option value="#2c3e90">Mavi</option>
+                <option value="#e74c3c">Kırmızı</option>
+                <option value="#2ecc71">Yeşil</option>
+            </select>
+        </div>
+        <div>
+            <label>Ses Frekansı:</label>
+            <select id="frequencySelector" onchange="updateSettings()">
+                <option value="500">Delta Dalgaları</option>
+                <option value="250" selected>Theta Dalgaları</option>
+                <option value="125">Alfa Dalgaları</option>
+            </select>
+        </div>
+        <div>
+            <label>Top Hızı:</label>
+            <select id="speedSelector" onchange="updateSettings()">
+                <option value="1250">Yavaş</option>
+                <option value="1000" selected>Normal</option>
+                <option value="833">Hızlı</option>
+            </select>
+        </div>
+    </div>
+
+    <button id="personalizeBtn" onclick="goToPersonalization()">Kişiselleştir</button>
+    <div id="personalizationStatus" class="hide">Kişiselleştirilmiş Ayarlar Aktif</div>
+
+    <div id="startInstruction">
+        EMDR Simülasyonunu Başlatmak İçin Düğmeleri Kullanın
+    </div>
+
+    <div id="tracker"></div>
+    <div class="control-section">
+        <button id="startVisualBtn" onclick="startVisualTracking()">Görsel Başlat</button>
+        <button id="startAudioBtn" onclick="startAudioTracking()">Ses Başlat</button>
+        <button id="stopBtn" class="hide" onclick="stopTracking()">Durdur</button>
+    </div>
+
+    <script>
+        const tracker = document.getElementById('tracker');
+        const startInstruction = document.getElementById('startInstruction');
+        const screenWidth = window.innerWidth;
+        const colorSelector = document.getElementById('colorSelector');
+        const frequencySelector = document.getElementById('frequencySelector');
+        const speedSelector = document.getElementById('speedSelector');
+        const startVisualBtn = document.getElementById('startVisualBtn');
+        const startAudioBtn = document.getElementById('startAudioBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const personalizationStatus = document.getElementById('personalizationStatus');
+        let visualTrackingInterval;
+        let audioInterval;
+        let isRight = true;
+        let audioContext;
+        let oscillator;
+        let isVisualActive = false;
+        let isAudioActive = false;
+        let currentSpeed;
+
+        const AUDIO_SPEED = 1500;
+
+        function loadPersonalizationSettings() {
+            const recommendedColor = localStorage.getItem('recommendedColor');
+            const recommendedFreq = localStorage.getItem('recommendedFrequency');
+
+            if (recommendedColor && recommendedFreq) {
+                const colorMap = {
+                    'red': '#e74c3c',
+                    'blue': '#2c3e90',
+                    'green': '#2ecc71'
+                };
+
+                if (colorMap[recommendedColor]) {
+                    colorSelector.value = colorMap[recommendedColor];
+                }
+
+                const freqMap = {
+                    'alpha': '125',
+                    'theta': '250',
+                    'delta': '500'
+                };
+
+                if (freqMap[recommendedFreq]) {
+                    frequencySelector.value = freqMap[recommendedFreq];
+                }
+
+                updateSettings();
+
+                personalizationStatus.classList.remove('hide');
+
+                console.log('Kişiselleştirme ayarları yüklendi:', {
+                    color: recommendedColor,
+                    frequency: recommendedFreq
+                });
+            }
+        }
+
+        function goToPersonalization() {
+            window.location.href = 'kişiselleştirme.html';
+        }
+
+        function initAudioContext() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        function playSound(pan) {
+            if (!audioContext) initAudioContext();
+
+            if (oscillator) {
+                oscillator.stop();
+                oscillator.disconnect();
+            }
+
+            const frequency = parseInt(frequencySelector.value);
+            oscillator = audioContext.createOscillator();
+            const pannerNode = audioContext.createStereoPanner();
+            const gainNode = audioContext.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            pannerNode.pan.setValueAtTime(pan, audioContext.currentTime);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(pannerNode);
+            pannerNode.connect(audioContext.destination);
+
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 1);
+        }
+
+        function moveTracker() {
+            const leftPosition = isRight
+                ? screenWidth * 0.9
+                : screenWidth * 0.1;
+
+            tracker.style.left = `${leftPosition}px`;
+            tracker.style.top = '50%';
+            isRight = !isRight;
+        }
+
+        function startVisualTracking() {
+            stopVisualTracking();
+            currentSpeed = parseInt(speedSelector.value);
+
+            tracker.style.opacity = '1';
+            startInstruction.style.display = 'none';
+
+            startVisualBtn.classList.add('hide');
+            startAudioBtn.classList.add('hide');
+            stopBtn.classList.remove('hide');
+
+            isVisualActive = true;
+            visualTrackingInterval = setInterval(moveTracker, currentSpeed);
+        }
+
+        function stopVisualTracking() {
+            if (visualTrackingInterval) {
+                clearInterval(visualTrackingInterval);
+                visualTrackingInterval = null;
+                isVisualActive = false;
+                tracker.style.opacity = '0';
+                startInstruction.style.display = 'block';
+            }
+        }
+
+        function startAudioTracking() {
+            stopAudioTracking();
+
+            startVisualBtn.classList.add('hide');
+            startAudioBtn.classList.add('hide');
+            stopBtn.classList.remove('hide');
+
+            isAudioActive = true;
+
+            audioInterval = setInterval(() => {
+                playSound(-1);
+                setTimeout(() => playSound(1), AUDIO_SPEED / 2);
+            }, AUDIO_SPEED);
+        }
+
+        function stopAudioTracking() {
+            if (audioInterval) {
+                clearInterval(audioInterval);
+                audioInterval = null;
+                isAudioActive = false;
+            }
+        }
+
+        function stopTracking() {
+            stopVisualTracking();
+            stopAudioTracking();
+
+            startVisualBtn.classList.remove('hide');
+            startAudioBtn.classList.remove('hide');
+            stopBtn.classList.add('hide');
+
+            tracker.style.left = `${screenWidth * 0.1}px`;
+            tracker.style.top = '50%';
+            tracker.style.opacity = '0';
+            startInstruction.style.display = 'block';
+        }
+
+        function updateSettings() {
+            tracker.style.backgroundColor = colorSelector.value;
+            const newSpeed = parseInt(speedSelector.value);
+
+            if (isVisualActive && visualTrackingInterval) {
+                clearInterval(visualTrackingInterval);
+                visualTrackingInterval = setInterval(moveTracker, newSpeed);
+                currentSpeed = newSpeed;
+            }
+        }
+
+        window.onload = function() {
+            tracker.style.backgroundColor = colorSelector.value;
+            tracker.style.left = `${screenWidth * 0.1}px`;
+            tracker.style.top = '50%';
+
+            loadPersonalizationSettings();
+        }
+    </script>
+
+</body>
+</html>
+
+

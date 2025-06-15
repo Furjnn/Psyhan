@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Psyhan", "Psyhan\Psyhan.csproj", "{C579AE99-7676-493E-B767-18B2027D33A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Business", "Business\Business.csproj", "{93D1F722-4009-41E3-92A9-6BB88C78AABE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dataaccess", "Dataaccess\Dataaccess.csproj", "{DBFC9FA9-C961-467B-B6ED-FFD22DAC82EF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C579AE99-7676-493E-B767-18B2027D33A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C579AE99-7676-493E-B767-18B2027D33A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C579AE99-7676-493E-B767-18B2027D33A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C579AE99-7676-493E-B767-18B2027D33A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93D1F722-4009-41E3-92A9-6BB88C78AABE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93D1F722-4009-41E3-92A9-6BB88C78AABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93D1F722-4009-41E3-92A9-6BB88C78AABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93D1F722-4009-41E3-92A9-6BB88C78AABE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBFC9FA9-C961-467B-B6ED-FFD22DAC82EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBFC9FA9-C961-467B-B6ED-FFD22DAC82EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBFC9FA9-C961-467B-B6ED-FFD22DAC82EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBFC9FA9-C961-467B-B6ED-FFD22DAC82EF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

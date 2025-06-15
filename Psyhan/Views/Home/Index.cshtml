@@ -1,0 +1,183 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+    Layout = null;
+}
+
+    <!DOCTYPE html>
+    <html lang="tr">
+    <head>
+        <meta charset="UTF-8">
+        <title>Kişiselleştirme</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+            }
+
+            .container {
+                background: white;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 0 15px rgba(0,0,0,0.1);
+                width: 90%;
+                max-width: 400px;
+            }
+
+            h2 {
+                margin-bottom: 20px;
+                color: #333;
+                text-align: center;
+            }
+
+            label {
+                display: block;
+                margin-top: 15px;
+                color: #555;
+            }
+
+            select {
+                width: 100%;
+                padding: 10px;
+                margin-top: 5px;
+                border-radius: 5px;
+                border: 1px solid #ccc;
+            }
+
+            button {
+                margin-top: 25px;
+                width: 100%;
+                padding: 12px;
+                background-color: #3498db;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                font-size: 16px;
+                cursor: pointer;
+            }
+
+                button:hover {
+                    background-color: #2980b9;
+                }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Kişiselleştirme</h2>
+            <label for="mood">1. Şu anki genel ruh haliniz nasıl?</label>
+            <select id="mood">
+                <option value="anxious">Endişeli / Kaygılı</option>
+                <option value="stressed">Stresli / Gergin</option>
+                <option value="angry">Öfkeli / Sinirli</option>
+            </select>
+
+            <label for="energy">2. Enerji durumunuz nasıl?</label>
+            <select id="energy">
+                <option value="low">Düşük Enerji</option>
+                <option value="high">Yüksek Enerji</option>
+            </select>
+
+            <label for="relax">3. Ne tür bir rahatlama arıyorsunuz?</label>
+            <select id="relax">
+                <option value="calm">Sakinleşme</option>
+                <option value="focus">Odaklanma</option>
+                <option value="energy">Enerji</option>
+            </select>
+
+            <button onclick="generateSuggestion()">Önerilerimi Oluştur</button>
+        </div>
+        <script src="utils.js"></script>
+        <script>
+
+window.onload = function() {
+    const savedMood = localStorage.getItem('userMood');
+    const savedEnergy = localStorage.getItem('userEnergy');
+    const savedRelax = localStorage.getItem('userRelax');
+
+    if (savedMood) document.getElementById('mood').value = savedMood;
+    if (savedEnergy) document.getElementById('energy').value = savedEnergy;
+    if (savedRelax) document.getElementById('relax').value = savedRelax;
+}
+
+function generateSuggestion() {
+    const mood = document.getElementById('mood').value;
+    const energy = document.getElementById('energy').value;
+    const relax = document.getElementById('relax').value;
+
+    // Kullanıcı tercihlerini localStorage'a kaydet
+    localStorage.setItem('userMood', mood);
+    localStorage.setItem('userEnergy', energy);
+    localStorage.setItem('userRelax', relax);
+
+    const frequencyVotes = {};
+    const colorVotes = {};
+
+    function vote(map, key) {
+        map[key] = (map[key] || 0) + 1;
+    }
+
+    if (mood === 'stressed') {
+        vote(frequencyVotes, 'alpha');
+        vote(colorVotes, 'blue');
+    } else if (mood === 'anxious') {
+        vote(frequencyVotes, 'theta');
+        vote(colorVotes, 'green');
+    } else if (mood === 'angry') {
+        vote(frequencyVotes, 'delta');
+        vote(colorVotes, 'blue');
+    }
+
+    if (energy === 'low') {
+        vote(frequencyVotes, 'theta');
+        vote(colorVotes, 'red');
+    } else if (energy === 'high') {
+        vote(frequencyVotes, 'alpha');
+        vote(colorVotes, 'blue');
+    }
+
+    if (relax === 'energy') {
+        vote(frequencyVotes, 'alpha');
+        vote(colorVotes, 'red');
+    } else if (relax === 'focus') {
+        vote(frequencyVotes, 'alpha');
+        vote(colorVotes, 'blue');
+    } else if (relax === 'calm') {
+        vote(frequencyVotes, 'theta');
+        vote(frequencyVotes, 'delta');
+        vote(colorVotes, 'green');
+    }
+
+    function getMaxKey(map) {
+        return Object.entries(map).reduce((a, b) => b[1] > a[1] ? b : a, ['', 0])[0];
+    }
+
+    const finalFreq = getMaxKey(frequencyVotes);
+    const finalColor = getMaxKey(colorVotes);
+
+    // Hesaplanan sonuçları da localStorage'a kaydet
+    localStorage.setItem('recommendedFrequency', finalFreq);
+    localStorage.setItem('recommendedColor', finalColor);
+
+    const freqNames = {
+        alpha: 'Alfa (8-12 Hz) - Odaklanmış Zihin',
+        theta: 'Theta (4-8 Hz) - Yaratıcılık ve Gevşeme',
+        delta: 'Delta (0.5-4 Hz) - Derin Huzur ve Uyku'
+    };
+
+    const colorNames = {
+        red: 'Kırmızı',
+        blue: 'Mavi',
+        green: 'Yeşil'
+    };
+
+    alert(`Önerilen Frekans: ${freqNames[finalFreq]}\nÖnerilen Renk: ${colorNames[finalColor]}`);
+
+    window.location.href = '/Home/Main';
+}
+        </script>
+    </body>
+</html>
